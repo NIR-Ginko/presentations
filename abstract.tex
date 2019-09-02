@@ -1,0 +1,170 @@
+%encoding UTF-8
+\author{Игорь Чудов}
+\city{Саратов}
+\affiliation{BaseALT}
+\projecttitle{SBCL}
+\projecturl{\url{http://www.sbcl.org/}}
+\title{Проблемы портирования SBCL на новые аппаратные платформы}
+\maketitle
+
+\begin{abstract}
+  В докладе рассмотрена "проблема бутстрапа" реализации компилятора
+  языка программирования Common LISP --- SBCL (Steel Bank Common LISP)
+  в приложении к архитектуре e2k. Рассмотрены составные элементы данного
+  ПО, этапы бутстрапа, а также некоторые подробности низкоуровневого
+  устройства. Данная работа призвана объединить разрозенные знания об
+  устройстве проекта.
+\end{abstract}
+
+\section{Проблематика}
+
+Попытка безболезненной сборки компилятора SBCL на Elbrus 101-PC не
+увенчалась успехом, в связи с чем было начато исследование проекта.
+
+В процессе работы было обнаружено, что полноценное портирование на новые
+архитектуры выполняется достаточно редко, а портирование на архитектуры
+типа MIPS может выполняться по остаточному принципу о чём прямо написано
+в коде. В результате в новых версиях программы поддержка конкретной
+архитектуры может не гарантироваться.
+
+Так как писать компилятор языка программирования на этом же языке
+программирования является достаточно популярной тенденцией - при
+возникновении новых архитектур возникает "проблема бутстрапа", которую
+иногда называют проблемой "курицы и яйца". SBCL также подвержен данной
+проблеме, но в относительно небольшой степени.
+
+\section{Устройство и этапы сборки}
+
+Бутстрап SBCL невозможен без существования интерпретатора Common LISP,
+но первичная сборка может быть осуществлена без инструментов
+кросс-компиляции. Для собственно инициализации сборки в таком случае
+необходим компилятор C, ассемблер и линкер для целевой платформы.
+
+Интерпретатор Common LISP может отсутствовать на целевой платформе, но
+возможно применить его к дереву сборки перенеся на платформу, где
+которой он уже имеется.
+
+Простейший процесс сборки на новой платформе выглядит так:
+
+Cross-compiling SBCL is easy; especially so if you arrange matters (e.g. using NFS)
+
+so that host and target systems can see the same build directory. make.sh doesn't
+
+cater for it directly, so you run each of the five scripts by hand. For example,
+
+cross-compiling to PPC is something like
+
+
+host$ export SBCL_ARCH=ppc
+
+or
+
+
+host$ export SBCL_ARCH=x86
+
+ppc$ export SBCL_ARCH=x86
+
+
+host$ export SBCL_XC_HOST=sbcl
+
+ppc$ . ./find-gnumake.sh
+
+ppc$ find_gnumake
+
+ppc$ sh make-config.sh
+
+host$ sh make-host-1.sh
+
+ppc$ sh make-target-1.sh
+
+host$ sh make-host-2.sh
+
+ppc$ sh make-target-2.sh
+
+ppc$ sh make-target-contrib.sh
+
+
+
+target$ GNUMAKE=make sh ./make-config.sh
+
+host$ GNUMAKE=gmake SBCL_ARCH='arch' sh ./make-config.sh
+
+host$ scp target:sbcl-directory/local-target-features.lisp-expr .
+
+host$ scp target:sbcl-directory/output/build-id.tmp output/
+
+host$ SBCL_XC_HOST='lisp -batch' sh ./make-host-1.sh
+
+host$ scp -r src/runtime/genesis src/runtime/ldso-stubs.S target:sbcl-directory/src/runtime/
+
+target$ GNUMAKE=make sh ./make-target-1.sh
+
+target$ scp src/runtime/sbcl.nm host:sbcl-directory/src/runtime/
+
+target$ scp output/stuff-groveled-from-headers.lisp host:sbcl-directory/output/
+
+host$ SBCL_XC_HOST='lisp -batch' sh ./make-host-2.sh
+
+host$ scp output/cold-sbcl.core target:sbcl-directory/output/
+
+target$ sh ./make-target-2.sh
+
+target$ sh ./make-target-contrib.sh
+
+
+
+
+\section{Благодарность}
+
+\begin{itemize}
+\item Bruce O'Neel
+\item Charles Zhang
+\end{itemize}
+
+В тексте могут встречаться: 
+\begin{itemize}
+\item имена файлов, команд и т. п. в неизменном виде \Q{verbatim text
+    with ^_@&\%\#\${}\\};
+\item URL \url{http://somewhere.org};
+\item англоязычные вставки \EN{english phrase};
+\item текстовые выделения \emph{курсив}.
+\end{itemize}
+
+\section{Могут встречаться подразделы}
+
+Требования к иллюстрациям: 
+\begin{itemize}
+\item \emph{Чёрно-белые}. Если оригиналы у Вас цветные, то стоит
+  самостоятельно сконвертировать в оттенки серого и посмотреть, что
+  стало с контрастностью и насыщенностью, в случае необходимости
+  подправить.
+\item \emph{Ширина} изображений не должна превышать 110\,мм,
+  \emph{высота} "--- не более 160\,мм.
+\item \emph{Растровые} -- в формате без потери качества (TIFF), 300 dpi.
+\item \emph{Векторные} -- в векторном формате, трансформируемом без потерь в
+  eps (лучше всего сразу в eps).
+\item Если на изображении есть \emph{текст}, стоит проверить, что при
+  данном размере (на печати) буквы не слишком маленькие.
+\end{itemize}
+
+% Вставка иллюстраций.
+% \begin{figure}
+%   \centering
+%   \includegraphics{example.eps}
+% \caption{Подпись к иллюстрации (необязательно). Точка в конце не ставится}
+% \end{figure}
+
+Оформление ссылок\cite{brooks}. Простое оформление библиографии
+приведено ниже, однако не возбраняется и даже приветствуется
+использование BibTeX.
+
+\begin{thebibliography}{9}
+\bibitem{brooks} \textit{Брукс Ф.} Мифический человеко-месяц,
+  или как создаются программные системы. \url{http://www.lib.ru/CTOTOR/BRUKS/mithsoftware.txt}
+\end{thebibliography}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End: 
