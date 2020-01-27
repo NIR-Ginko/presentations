@@ -1,0 +1,53 @@
+\documentclass[notitlepage]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[russian,english]{babel}
+\usepackage{ragged2e}
+\usepackage{hyperref}
+%\usepackage{url}
+\urlstyle{same}
+
+\usepackage{minted}
+
+\begin{document}
+
+\begin{flushright}Стажёр: \line(1,0){275} \end{flushright}
+
+\paragraph{Задачи}
+\begin{center}
+\line(1,0){500} \\
+\line(1,0){500} \\
+\line(1,0){500} \\
+\line(1,0){500} \\
+\end{center}
+
+\paragraph{Ресурсы}
+\begin{itemize}
+\setlength\itemsep{0em}
+\item \url{https://getalt.org/ru/} - страница загрузки образов;
+\item \url{https://www.altlinux.org/} - справочные материалы;
+\item \url{http://git.altlinux.org/gears/} - репозитории пакетов;
+\item \url{https://bugzilla.altlinux.org} - сервис багрепортов;
+\end{itemize}
+
+\paragraph{Работа с Git}\mbox{} \\
+Скачивание репозитория на диск для работы:
+\begin{minted}{bash}
+git clone http://git.altlinux.org/gears/s/somepackage.git
+\end{minted}
+
+\paragraph{Сборка пакета}\mbox{} \\
+Сборка Gear репозитория в Hasher:
+\begin{minted}{bash}
+gear-hsh --verbose --lazy-cleanup
+\end{minted}
+
+\paragraph{Работа с RPM}\mbox{} \\
+Установка пакета с программой:
+\begin{minted}{bash}
+rpm -i /path/to/package.rpm
+\end{minted}
+
+\end{document}
+

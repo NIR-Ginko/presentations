@@ -1,0 +1,6 @@
+*.aux
+*.log
+*.out
+_minted-main
+main.pdf
+
